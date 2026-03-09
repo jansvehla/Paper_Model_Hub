@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Youtube, Mail } from 'lucide-react';
+import logo from '../../assets/e69166f1ae95a8c8bd6567f546a87a62b547778b.png'
 
 export function Footer() {
   const footerLinks = {
@@ -54,7 +55,7 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img 
-              src="figma:asset/7929ef9baaefeef69baa4ccabc17ac532bdcfab6.png" 
+              src={logo} 
               alt="The Paper Model Hub" 
               className="h-8 w-auto"
             />
