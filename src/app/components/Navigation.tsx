@@ -4,62 +4,99 @@ import imgImage1 from "figma:asset/e69166f1ae95a8c8bd6567f546a87a62b547778b.png"
 
 export function Navigation() {
   return (
-    <div className="bg-white content-stretch flex flex-col h-[81px] items-start px-[40px] sticky top-0 z-50 w-full" data-name="header">
-      <div aria-hidden="true" className="absolute border-[#f1f5f9] border-b border-solid inset-0 pointer-events-none" />
-      <div className="content-stretch flex h-[80px] items-center relative shrink-0 w-full" data-name="div">
-        <div className="flex-[1_0_0] h-[48px] min-h-px min-w-px relative" data-name="nav">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[32px] items-center relative size-full">
-            <Link to="/" className="relative shrink-0" data-name="Logo">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[10px] items-center relative">
-                <div className="h-[40px] relative shrink-0 w-[36px]" data-name="image 1">
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <img alt="The Paper Model Hub" className="absolute h-[286.57%] left-[-236.63%] max-w-none top-[-75.75%] w-[572.84%]" src={imgImage1} />
-                  </div>
-                </div>
-                <p className="font-['Inter:Black',sans-serif] font-black leading-[0] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap">
-                  <span className="leading-[24px]">{`THE `}</span>
-                  <span className="leading-[24px] text-[#2f8bcc]">PAPER</span>
-                  <span className="leading-[24px]">{` `}</span>
-                  <span className="leading-[24px] text-[#fe5c57]">MODEL HUB</span>
-                </p>
+    <header className="sticky top-0 z-50 w-full border-b border-[#f1f5f9] bg-white">
+      <div className="mx-auto flex h-[81px] w-full max-w-[1101px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-6 lg:gap-8">
+          <Link to="/" className="shrink-0">
+            <div className="flex items-center gap-[10px]">
+              <div className="relative h-[40px] w-[36px] shrink-0 overflow-hidden">
+                <img
+                  alt="The Paper Model Hub"
+                  className="absolute left-[-236.63%] top-[-75.75%] h-[286.57%] max-w-none w-[572.84%]"
+                  src={imgImage1}
+                />
               </div>
+
+              <p className="whitespace-nowrap font-['Inter:Black',sans-serif] text-[16px] font-black leading-[24px] text-[#45556c]">
+                <span>{`THE `}</span>
+                <span className="text-[#2f8bcc]">PAPER</span>
+                <span>{` `}</span>
+                <span className="text-[#fe5c57]">MODEL HUB</span>
+              </p>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-[12px] lg:flex">
+            <Link
+              to="/models"
+              className="flex items-center justify-center p-[10px] text-[16px] font-medium leading-[24px] text-[#45556c] transition-colors hover:text-[#2f8bcc]"
+            >
+              Models
             </Link>
-            <div className="relative shrink-0" data-name="Items">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[32px] items-center relative">
-                <Link to="/models" className="content-stretch flex items-center justify-center p-[10px] relative shrink-0">
-                  <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap hover:text-[#2f8bcc] transition-colors">Models</p>
-                </Link>
-                <div className="content-stretch flex items-center justify-center p-[10px] relative shrink-0">
-                  <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap">Collections</p>
-                </div>
-                <div className="content-stretch flex items-center justify-center p-[10px] relative shrink-0">
-                  <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap">Books</p>
-                </div>
-                <div className="content-stretch flex items-center justify-center p-[10px] relative shrink-0">
-                  <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap">Archive</p>
-                </div>
-                <div className="content-stretch flex items-center justify-center p-[10px] relative shrink-0">
-                  <p className="font-['Inter:Medium',sans-serif] font-medium leading-[24px] not-italic relative shrink-0 text-[#45556c] text-[16px] whitespace-nowrap">Community</p>
-                </div>
-              </div>
+
+            <div className="flex items-center justify-center p-[10px] text-[16px] font-medium leading-[24px] text-[#45556c]">
+              Collections
             </div>
-          </div>
+
+            <div className="flex items-center justify-center p-[10px] text-[16px] font-medium leading-[24px] text-[#45556c]">
+              Books
+            </div>
+
+            <div className="flex items-center justify-center p-[10px] text-[16px] font-medium leading-[24px] text-[#45556c]">
+              Archive
+            </div>
+
+            <div className="flex items-center justify-center p-[10px] text-[16px] font-medium leading-[24px] text-[#45556c]">
+              Community
+            </div>
+          </nav>
         </div>
-        <div className="h-[38px] relative shrink-0" data-name="Container">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[8px] h-full items-center relative">
-            <div className="relative shrink-0 size-[36px] rounded-[16777200px]">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start pt-[8px] px-[8px] relative size-full">
-                <Search className="w-[20px] h-[20px] text-[#90A1B9]" />
-              </div>
-            </div>
-            <div className="relative shrink-0 size-[36px]">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start pt-[8px] px-[8px] relative size-full">
-                <ShoppingCart className="w-[20px] h-[20px] text-[#90A1B9]" />
-              </div>
-            </div>
+
+        <div className="flex shrink-0 items-center gap-[8px]">
+          <button
+            type="button"
+            aria-label="Search"
+            className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
+          >
+            <Search className="h-[20px] w-[20px] text-[#90A1B9]" />
+          </button>
+
+          <button
+            type="button"
+            aria-label="Shopping cart"
+            className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
+          >
+            <ShoppingCart className="h-[20px] w-[20px] text-[#90A1B9]" />
+          </button>
+        </div>
+      </div>
+
+      <div className="border-t border-[#f8fafc] lg:hidden">
+        <div className="mx-auto flex w-full max-w-[1101px] gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
+          <Link
+            to="/models"
+            className="shrink-0 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[14px] font-medium text-[#45556c]"
+          >
+            Models
+          </Link>
+
+          <div className="shrink-0 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[14px] font-medium text-[#45556c]">
+            Collections
+          </div>
+
+          <div className="shrink-0 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[14px] font-medium text-[#45556c]">
+            Books
+          </div>
+
+          <div className="shrink-0 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[14px] font-medium text-[#45556c]">
+            Archive
+          </div>
+
+          <div className="shrink-0 rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[14px] font-medium text-[#45556c]">
+            Community
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
