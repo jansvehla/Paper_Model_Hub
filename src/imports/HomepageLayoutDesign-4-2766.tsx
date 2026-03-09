@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from "react";
 import { Link } from "react-router";
 import {
   Plane,
@@ -17,13 +18,10 @@ import {
 } from "lucide-react";
 
 import imgImage3 from "figma:asset/270b7f287debf641c7e4cde786100e746d3ab297.png";
-import imgImage4 from "figma:asset/23ffdfd0a13e62cd01778e3bdc98de30bb2893f8.png";
-import imgImage6 from "figma:asset/c7883fabe0a4bd4adc772a3c0c78e2e7c23c87fc.png";
-import imgImage5 from "figma:asset/d46506e28fcdb5382ee508db8925023158422421.png";
-import imgImage7 from "figma:asset/4edc4a9349402d8c58fe35ef0ea245f0829f19a5.png";
-import imgImage9 from "figma:asset/9694ebd9c3dd840ba9e8725785f908968c35c6e0.png";
 import imgImage12 from "figma:asset/7e0c65f3db81012c16915ba632e568b9a8131670.png";
 import img932B0F9011 from "figma:asset/2f1a9e2d94dcc36529fdca6d9532e3494e3fe438.png";
+
+import { paperModels } from "../app/data/models";
 
 const categories = [
   { label: "Aircraft", icon: Plane },
@@ -32,15 +30,6 @@ const categories = [
   { label: "Military", icon: Shield },
   { label: "Ships", icon: Ship },
   { label: "Beginner", icon: Sparkles },
-];
-
-const popularModels = [
-  { title: "Boeing 747 Classic", image: imgImage4 },
-  { title: "Boeing 747 Classic", image: imgImage6 },
-  { title: "Boeing 747 Classic", image: imgImage5 },
-  { title: "Boeing 747 Classic", image: imgImage7 },
-  { title: "Boeing 747 Classic", image: imgImage3 },
-  { title: "Boeing 747 Classic", image: imgImage9 },
 ];
 
 const communityItems = [
@@ -87,7 +76,7 @@ function CategoryCard({
   icon: Icon,
 }: {
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
 }) {
   return (
     <div className="rounded-[16px] border border-[#f1f5f9] bg-white p-5 shadow-[0px_1px_3px_rgba(0,0,0,0.10),0px_1px_2px_rgba(0,0,0,0.06)]">
@@ -107,7 +96,7 @@ function MetaItem({
   icon: Icon,
   text,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   text: string;
 }) {
   return (
@@ -119,11 +108,21 @@ function MetaItem({
 }
 
 function ModelCard({
+  id,
   title,
   image,
+  difficulty,
+  pages,
+  buildTime,
+  scale,
 }: {
+  id: string;
   title: string;
   image: string;
+  difficulty: string;
+  pages: number;
+  buildTime: string;
+  scale: string;
 }) {
   return (
     <div className="overflow-hidden rounded-[16px] border border-[#e5e7eb] bg-white shadow-sm">
@@ -159,21 +158,21 @@ function ModelCard({
           </div>
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <MetaItem icon={TrendingUp} text="Intermediate" />
-            <MetaItem icon={FileText} text="12 pages" />
-            <MetaItem icon={Clock3} text="3-4 hours" />
-            <MetaItem icon={Ruler} text="1:200" />
+            <MetaItem icon={TrendingUp} text={difficulty} />
+            <MetaItem icon={FileText} text={`${pages} pages`} />
+            <MetaItem icon={Clock3} text={buildTime} />
+            <MetaItem icon={Ruler} text={scale} />
           </div>
 
           <div className="flex gap-2">
             <Link
-              to="/models/1"
+              to={`/models/${id}`}
               className="flex-1 rounded-[8px] bg-[#4a90e2] px-3 py-2 text-center text-[14px] font-medium text-white transition-opacity hover:opacity-90"
             >
               View model
             </Link>
             <Link
-              to="/models/1"
+              to={`/models/${id}`}
               className="flex-1 rounded-[8px] bg-[#fe5c57] px-3 py-2 text-center text-[14px] font-medium text-white transition-opacity hover:opacity-90"
             >
               Buy model
@@ -197,7 +196,7 @@ function CommunityCard({
   title: string;
   description: string;
   button: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   iconBg: string;
   buttonColor: string;
   darkIcon: boolean;
@@ -237,7 +236,7 @@ function SectionHeader({
 }: {
   title: string;
   description: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -255,13 +254,15 @@ function SectionHeader({
 }
 
 export default function HomepageLayoutDesign() {
+  const popularModels = paperModels.slice(0, 6);
+
   return (
     <div className="w-full bg-white" data-name="Homepage layout design">
       <div className="mx-auto w-full max-w-[1200px]">
         <div className="flex w-full flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
           <section className="flex flex-col gap-6">
             <div className="overflow-hidden rounded-[32px] bg-[#6b090c] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.10),0px_8px_10px_-6px_rgba(0,0,0,0.10)]">
-              <div className="grid min-h-[400px] items-center gap-8 px-6 py-8 md:grid-cols-[0.95fr_1.05fr] md:px-8 lg:px-10">
+              <div className="grid h-[400px] items-center gap-8 px-6 py-8 md:grid-cols-[0.95fr_1.05fr] md:px-8 lg:px-10">
                 <div className="flex flex-col items-start justify-center">
                   <div className="inline-flex rounded-[12px] bg-[rgba(209,209,209,0.4)] px-3 py-2">
                     <p className="text-[14px] font-semibold text-white">New Releases</p>
@@ -283,7 +284,7 @@ export default function HomepageLayoutDesign() {
                   <img
                     alt="Explore Czech football stadiums"
                     src={imgImage3}
-                    className="w-full max-w-[620px] object-contain"
+                    className="max-h-[320px] w-full max-w-[620px] object-contain"
                   />
                 </div>
               </div>
@@ -301,21 +302,26 @@ export default function HomepageLayoutDesign() {
               title="Popular this week"
               description="Most built models from the community"
               action={
-                <button
-                  type="button"
+                <Link
+                  to="/models"
                   className="rounded-[12px] border-2 border-[#4a90e2] bg-white px-5 py-2 text-[14px] font-semibold text-[#4a90e2]"
                 >
                   Show more
-                </button>
+                </Link>
               }
             />
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {popularModels.map((model, index) => (
+              {popularModels.map((model) => (
                 <ModelCard
-                  key={`${model.title}-${index}`}
-                  title={model.title}
+                  key={model.id}
+                  id={model.id}
+                  title={model.name}
                   image={model.image}
+                  difficulty={model.difficulty}
+                  pages={model.pages}
+                  buildTime={model.buildTime}
+                  scale={model.scale}
                 />
               ))}
             </div>
