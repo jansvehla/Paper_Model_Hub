@@ -1,7 +1,7 @@
 
   # Figma Make - Test
 
-  This is a code bundle for Figma Make - Test. 
+  This is a code bundle for Figma Make - Test. The original project is available at https://www.figma.com/design/dVfgZFXU8m3Uc7yC5W8DnB/Figma-Make---Test.
 
   ## Running the code
 
