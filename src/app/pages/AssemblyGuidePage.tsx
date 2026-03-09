@@ -1,26 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
-import {
-  Box,
-  RotateCw,
-  ZoomIn,
-  ZoomOut,
-  SkipBack,
-  SkipForward,
-  Play,
-  Pause,
-  ChevronLeft,
-  Grid3x3,
-  Layers,
-} from "lucide-react";
-import { Navigation } from "../components/Navigation";
-import { getModelById } from "../data/models";
+import { Link, useParams, useNavigate } from 'react-router';
+import { Navigation } from '../components/Navigation';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  Box, Eye, RotateCw, ZoomIn, ZoomOut, Move, Maximize2, SkipBack, SkipForward, 
+  Play, Pause, ChevronLeft, ChevronRight, Grid3x3, Layers
+} from 'lucide-react';
+
+// Import Figma assets
+import imgImage3 from "figma:asset/270b7f287debf641c7e4cde786100e746d3ab297.png";
 
 export default function AssemblyGuidePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const model = getModelById(id);
-
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
   const [zoom, setZoom] = useState(1);
   const [isRotating, setIsRotating] = useState(false);
@@ -28,315 +19,362 @@ export default function AssemblyGuidePage() {
   const [showLayers, setShowLayers] = useState(true);
   const [assemblyStep, setAssemblyStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
 
+  const totalSteps = 12;
+
+  // Auto-rotation effect
   useEffect(() => {
-    if (!isRotating) return;
-
-    const interval = setInterval(() => {
-      setRotation((prev) => ({
-        ...prev,
-        y: (prev.y + 1) % 360,
-      }));
-    }, 40);
-
-    return () => clearInterval(interval);
+    if (isRotating) {
+      const interval = setInterval(() => {
+        setRotation(prev => ({ ...prev, y: (prev.y + 1) % 360 }));
+      }, 50);
+      return () => clearInterval(interval);
+    }
   }, [isRotating]);
 
-  useEffect(() => {
-    if (!isAnimating || !model) return;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setLastPosition({ x: e.clientX, y: e.clientY });
+  };
 
-    const interval = setInterval(() => {
-      setAssemblyStep((prev) =>
-        prev < model.assemblySteps.length - 1 ? prev + 1 : prev
-      );
-    }, 1800);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - lastPosition.x;
+    const deltaY = e.clientY - lastPosition.y;
+    
+    setRotation(prev => ({
+      ...prev,
+      y: (prev.y + deltaX * 0.5) % 360,
+      x: Math.max(-90, Math.min(90, prev.x - deltaY * 0.5))
+    }));
+    
+    setLastPosition({ x: e.clientX, y: e.clientY });
+  };
 
-    return () => clearInterval(interval);
-  }, [isAnimating, model]);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-  const currentTip = useMemo(() => {
-    if (!model) return "";
-    return model.assemblyTips[Math.min(assemblyStep, model.assemblyTips.length - 1)];
-  }, [assemblyStep, model]);
+  const resetView = () => {
+    setRotation({ x: 0, y: 0, z: 0 });
+    setZoom(1);
+  };
 
-  if (!model) {
-    return (
-      <div className="min-h-screen bg-[#f8fafc]">
-        <Navigation />
-        <main className="mx-auto max-w-[900px] px-4 py-16 text-center sm:px-6 lg:px-8">
-          <h1 className="text-[36px] font-bold text-[#101828]">Model not found</h1>
-          <Link
-            to="/models"
-            className="mt-6 inline-flex rounded-[12px] bg-[#4a90e2] px-5 py-3 font-semibold text-white"
-          >
-            Back to models
-          </Link>
-        </main>
-      </div>
-    );
-  }
+  const nextStep = () => {
+    if (assemblyStep < totalSteps - 1) {
+      setAssemblyStep(prev => prev + 1);
+    }
+  };
 
-  const totalSteps = model.assemblySteps.length;
+  const prevStep = () => {
+    if (assemblyStep > 0) {
+      setAssemblyStep(prev => prev - 1);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="bg-[#f8fafc] min-h-screen">
+      {/* Navigation */}
       <Navigation />
 
-      <main className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-center gap-3 text-[14px] text-[#667085]">
-          <Link to="/" className="hover:text-[#4a90e2]">
-            Home
-          </Link>
-          <span>/</span>
-          <Link to="/models" className="hover:text-[#4a90e2]">
-            Models
-          </Link>
-          <span>/</span>
-          <Link to={`/models/${model.id}`} className="hover:text-[#4a90e2]">
-            {model.name}
-          </Link>
-          <span>/</span>
-          <span className="text-[#101828]">Assembly Guide</span>
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b border-[#f1f5f9]">
+        <div className="max-w-[1400px] mx-auto px-[40px] py-[16px]">
+          <div className="flex items-center gap-[8px] text-[14px] leading-[20px] tracking-[-0.1504px]">
+            <Link to="/" className="text-[#4a5565] hover:text-[#2f8bcc] transition-colors">
+              Home
+            </Link>
+            <span className="text-[#cbd5e1]">/</span>
+            <Link to="/models" className="text-[#4a5565] hover:text-[#2f8bcc] transition-colors">
+              Models
+            </Link>
+            <span className="text-[#cbd5e1]">/</span>
+            <Link to={`/models/${id}`} className="text-[#4a5565] hover:text-[#2f8bcc] transition-colors">
+              Sparta Prague Stadium
+            </Link>
+            <span className="text-[#cbd5e1]">/</span>
+            <span className="text-[#101828] font-semibold">Assembly Guide</span>
+          </div>
         </div>
+      </div>
 
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      {/* Main Content */}
+      <div className="max-w-[1400px] mx-auto px-[40px] py-[40px]">
+        <div className="mb-[24px] flex items-center justify-between">
           <div>
-            <h1 className="text-[38px] font-bold leading-tight tracking-[-0.03em] text-[#101828]">
+            <h1 className="font-['Inter:Extra_Bold',sans-serif] font-extrabold text-[36px] leading-[44px] text-[#101828] mb-[8px]">
               Interactive Assembly Guide
             </h1>
-            <p className="mt-2 text-[18px] text-[#4a5565]">
-              Step-by-step instructions for {model.name}
+            <p className="font-['Inter:Regular',sans-serif] text-[16px] leading-[24px] text-[#4a5565]">
+              Step-by-step 3D instructions to build your model
             </p>
           </div>
-
           <button
-            type="button"
-            onClick={() => navigate(`/models/${model.id}`)}
-            className="inline-flex items-center gap-2 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-2 text-[14px] font-semibold text-[#4a5565] hover:bg-[#f9fafb]"
+            onClick={() => navigate(`/models/${id}`)}
+            className="bg-white border-2 border-[#e5e7eb] text-[#4a5565] px-[24px] py-[12px] rounded-[12px] font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] hover:bg-[#f9fafb] transition-colors"
           >
-            <ChevronLeft className="h-4 w-4" />
             Back to Model
           </button>
         </div>
 
-        <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="overflow-hidden rounded-[28px] border border-[#e5e7eb] bg-white shadow-sm">
-            <div className="border-b border-[#e5e7eb] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[14px] font-semibold uppercase tracking-[0.08em] text-[#4a90e2]">
-                    3D Viewer
-                  </p>
-                  <h2 className="mt-1 text-[24px] font-bold text-[#101828]">
-                    {model.name}
-                  </h2>
-                </div>
-                <div className="rounded-full bg-[#eff6ff] px-4 py-2 text-[14px] font-semibold text-[#4a90e2]">
-                  Step {assemblyStep + 1} / {totalSteps}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div
-                className="relative flex h-[460px] items-center justify-center overflow-hidden rounded-[24px]"
+        <div className="grid grid-cols-[1fr_320px] gap-[24px]">
+          {/* 3D Viewer */}
+          <div className="bg-white rounded-[24px] border border-[#e5e7eb] overflow-hidden">
+            <div 
+              ref={canvasRef}
+              className="relative h-[700px] bg-gradient-to-br from-[#2f8bcc] to-[#fe5c57] cursor-move select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* 3D Model Placeholder */}
+              <div 
+                className="absolute inset-0 flex items-center justify-center"
                 style={{
-                  backgroundImage:
-                    "linear-gradient(235.588deg, rgb(47, 139, 204) 0%, rgb(254, 92, 87) 100%)",
+                  transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg) scale(${zoom})`,
+                  transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                 }}
               >
-                {showGrid && (
-                  <div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-                      backgroundSize: "24px 24px",
-                    }}
-                  />
-                )}
-
-                <div className="absolute left-6 top-6 rounded-[12px] bg-[rgba(255,255,255,0.9)] px-4 py-2 text-[14px] font-semibold text-[#1e2939]">
-                  X: {rotation.x.toFixed(0)}° · Y: {rotation.y.toFixed(0)}° · Zoom:{" "}
-                  {(zoom * 100).toFixed(0)}%
-                </div>
-
-                {showLayers && (
-                  <div className="absolute right-6 top-6 rounded-[12px] bg-[rgba(255,255,255,0.9)] px-4 py-2 text-[14px] font-semibold text-[#1e2939]">
-                    Assembly layer {assemblyStep + 1}
-                  </div>
-                )}
-
                 <img
-                  src={model.image}
-                  alt={model.name}
-                  className="max-h-[320px] w-full max-w-[620px] object-contain transition-transform duration-300"
-                  style={{
-                    transform: `scale(${zoom}) rotate(${rotation.y}deg)`,
-                  }}
+                  src={imgImage3}
+                  alt="3D Model"
+                  className="max-w-[80%] max-h-[80%] object-contain pointer-events-none"
+                  draggable={false}
                 />
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <button
-                  type="button"
-                  onClick={() => setIsRotating((prev) => !prev)}
-                  className={`flex items-center justify-center gap-2 rounded-[12px] px-4 py-3 text-[14px] font-semibold transition ${
-                    isRotating
-                      ? "bg-[#4a90e2] text-white"
-                      : "border border-[#e5e7eb] bg-white text-[#4a5565] hover:bg-[#f9fafb]"
-                  }`}
-                >
-                  <RotateCw className="h-4 w-4" />
-                  {isRotating ? "Stop Rotate" : "Auto Rotate"}
-                </button>
+              {/* Grid Overlay */}
+              {showGrid && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <svg width="100%" height="100%" className="opacity-10">
+                    <defs>
+                      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                  </svg>
+                </div>
+              )}
 
-                <button
-                  type="button"
-                  onClick={() => setZoom((prev) => Math.min(prev + 0.2, 2.5))}
-                  className="flex items-center justify-center gap-2 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 text-[14px] font-semibold text-[#4a5565] hover:bg-[#f9fafb]"
-                >
-                  <ZoomIn className="h-4 w-4" />
-                  Zoom In
-                </button>
+              {/* Info Overlay */}
+              <div className="absolute top-[20px] left-[20px] bg-[rgba(0,0,0,0.7)] backdrop-blur-sm px-[16px] py-[12px] rounded-[12px]">
+                <div className="flex items-center gap-[12px] text-white">
+                  <Box className="w-[20px] h-[20px]" />
+                  <div>
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[14px] leading-[20px]">
+                      Assembly Guide
+                    </p>
+                    <p className="font-['Inter:Regular',sans-serif] text-[12px] leading-[16px] opacity-80">
+                      Follow each step carefully
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => setZoom((prev) => Math.max(prev - 0.2, 0.7))}
-                  className="flex items-center justify-center gap-2 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 text-[14px] font-semibold text-[#4a5565] hover:bg-[#f9fafb]"
-                >
-                  <ZoomOut className="h-4 w-4" />
-                  Zoom Out
-                </button>
+              {/* Assembly Step Indicator */}
+              {showLayers && (
+                <div className="absolute top-[20px] right-[20px] bg-[rgba(0,0,0,0.7)] backdrop-blur-sm px-[16px] py-[12px] rounded-[12px] text-white">
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[14px] leading-[20px] mb-[4px]">
+                    Assembly Step
+                  </p>
+                  <p className="font-['Inter:Bold',sans-serif] font-bold text-[24px] leading-[32px]">
+                    {assemblyStep + 1} / {totalSteps}
+                  </p>
+                  <div className="w-full h-[4px] bg-white/30 rounded-full mt-[8px]">
+                    <div 
+                      className="h-full bg-[#4a90e2] rounded-full transition-all duration-300"
+                      style={{ width: `${((assemblyStep + 1) / totalSteps) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
+              {/* Rotation Indicator */}
+              <div className="absolute bottom-[20px] left-[20px] bg-[rgba(0,0,0,0.7)] backdrop-blur-sm px-[16px] py-[12px] rounded-[12px] text-white">
+                <p className="font-['Inter:Regular',sans-serif] text-[12px] leading-[16px]">
+                  X: {rotation.x.toFixed(0)}° | Y: {rotation.y.toFixed(0)}° | Zoom: {(zoom * 100).toFixed(0)}%
+                </p>
+              </div>
+            </div>
+
+            {/* Assembly Step Controls */}
+            <div className="bg-[#f9fafb] border-t border-[#e5e7eb] p-[20px]">
+              <div className="flex items-center gap-[12px]">
                 <button
-                  type="button"
-                  onClick={() => {
-                    setRotation({ x: 0, y: 0, z: 0 });
-                    setZoom(1);
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 text-[14px] font-semibold text-[#4a5565] hover:bg-[#f9fafb]"
+                  onClick={() => setAssemblyStep(0)}
+                  disabled={assemblyStep === 0}
+                  className="bg-white border border-[#e5e7eb] text-[#4a5565] p-[12px] rounded-[8px] hover:bg-[#eff6ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Box className="h-4 w-4" />
-                  Reset View
+                  <SkipBack className="w-[20px] h-[20px]" />
+                </button>
+                <button
+                  onClick={prevStep}
+                  disabled={assemblyStep === 0}
+                  className="bg-white border border-[#e5e7eb] text-[#4a5565] p-[12px] rounded-[8px] hover:bg-[#eff6ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-[20px] h-[20px]" />
+                </button>
+                <button
+                  onClick={() => setIsAnimating(!isAnimating)}
+                  className="flex-1 bg-[#4a90e2] hover:bg-[#3a7bc8] text-white px-[24px] py-[12px] rounded-[8px] font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] transition-colors flex items-center justify-center gap-[8px]"
+                >
+                  {isAnimating ? <Pause className="w-[20px] h-[20px]" /> : <Play className="w-[20px] h-[20px]" />}
+                  <span>{isAnimating ? 'Pause Animation' : 'Play Animation'}</span>
+                </button>
+                <button
+                  onClick={nextStep}
+                  disabled={assemblyStep === totalSteps - 1}
+                  className="bg-white border border-[#e5e7eb] text-[#4a5565] p-[12px] rounded-[8px] hover:bg-[#eff6ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-[20px] h-[20px]" />
+                </button>
+                <button
+                  onClick={() => setAssemblyStep(totalSteps - 1)}
+                  disabled={assemblyStep === totalSteps - 1}
+                  className="bg-white border border-[#e5e7eb] text-[#4a5565] p-[12px] rounded-[8px] hover:bg-[#eff6ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <SkipForward className="w-[20px] h-[20px]" />
                 </button>
               </div>
             </div>
           </div>
 
-          <aside className="flex flex-col gap-6">
-            <div className="rounded-[28px] border border-[#e5e7eb] bg-white p-6 shadow-sm">
-              <h2 className="text-[24px] font-bold text-[#101828]">
+          {/* Instructions Sidebar */}
+          <div className="space-y-[16px]">
+            {/* Current Step Instructions */}
+            <div className="bg-white rounded-[16px] border border-[#e5e7eb] p-[20px]">
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] leading-[24px] text-[#101828] mb-[12px]">
                 Step {assemblyStep + 1} Instructions
-              </h2>
-              <p className="mt-4 text-[16px] leading-8 text-[#4a5565]">
-                {model.assemblySteps[assemblyStep]}
+              </h3>
+              <p className="font-['Inter:Regular',sans-serif] text-[14px] leading-[20px] text-[#4a5565] mb-[16px]">
+                {assemblyStep === 0 && "Start by folding the base structure along the marked lines. Use a ruler for clean folds."}
+                {assemblyStep === 1 && "Attach the side panels to the base. Apply glue evenly along the tabs."}
+                {assemblyStep === 2 && "Connect the corner supports. Make sure they are perpendicular to the base."}
+                {assemblyStep === 3 && "Install the lower tier seating sections. Work from left to right."}
+                {assemblyStep === 4 && "Add the mid-level structural supports around the perimeter."}
+                {assemblyStep === 5 && "Attach the upper tier seating sections carefully."}
+                {assemblyStep === 6 && "Install the roof support structures at each corner."}
+                {assemblyStep === 7 && "Add the main roof panels, starting from one end."}
+                {assemblyStep === 8 && "Install the decorative facade elements around the exterior."}
+                {assemblyStep === 9 && "Add the pitch markings and field details."}
+                {assemblyStep === 10 && "Install the goal posts and corner flags."}
+                {assemblyStep === 11 && "Final touches: add signage and details. Your model is complete!"}
               </p>
-
-              <div className="mt-5 rounded-[18px] bg-[#eff6ff] p-4">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#4a90e2]">
-                  Tip
+              <div className="bg-[#eff6ff] p-[12px] rounded-[8px]">
+                <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] leading-[18px] text-[#4a90e2] mb-[4px]">
+                  💡 Tip
                 </p>
-                <p className="mt-2 text-[15px] leading-7 text-[#344054]">{currentTip}</p>
+                <p className="font-['Inter:Regular',sans-serif] text-[12px] leading-[18px] text-[#4a5565]">
+                  {assemblyStep < 6 && "Take your time with each fold - precision now makes assembly easier later."}
+                  {assemblyStep >= 6 && assemblyStep < 10 && "Let glue dry completely before moving to the next step."}
+                  {assemblyStep >= 10 && "Handle carefully - the structure is nearly complete!"}
+                </p>
               </div>
+            </div>
 
-              <div className="mt-5 flex gap-3">
+            {/* View Controls */}
+            <div className="bg-white rounded-[16px] border border-[#e5e7eb] p-[20px]">
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] leading-[24px] text-[#101828] mb-[16px]">
+                View Controls
+              </h3>
+              <div className="space-y-[12px]">
                 <button
-                  type="button"
-                  onClick={() => setAssemblyStep((prev) => Math.max(prev - 1, 0))}
-                  disabled={assemblyStep === 0}
-                  className="flex-1 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 text-[14px] font-semibold text-[#4a5565] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => setIsRotating(!isRotating)}
+                  className={`w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors ${
+                    isRotating 
+                      ? 'bg-[#4a90e2] text-white' 
+                      : 'bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff]'
+                  }`}
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <SkipBack className="h-4 w-4" />
-                    Previous
-                  </span>
+                  <RotateCw className="w-[20px] h-[20px]" />
+                  <span>Auto Rotate</span>
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() =>
-                    setAssemblyStep((prev) => Math.min(prev + 1, totalSteps - 1))
-                  }
-                  disabled={assemblyStep === totalSteps - 1}
-                  className="flex-1 rounded-[12px] border border-[#e5e7eb] bg-white px-4 py-3 text-[14px] font-semibold text-[#4a5565] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
+                  className="w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors"
                 >
-                  <span className="inline-flex items-center gap-2">
-                    Next
-                    <SkipForward className="h-4 w-4" />
-                  </span>
+                  <ZoomIn className="w-[20px] h-[20px]" />
+                  <span>Zoom In</span>
+                </button>
+                <button
+                  onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
+                  className="w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors"
+                >
+                  <ZoomOut className="w-[20px] h-[20px]" />
+                  <span>Zoom Out</span>
+                </button>
+                <button
+                  onClick={resetView}
+                  className="w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors"
+                >
+                  <Move className="w-[20px] h-[20px]" />
+                  <span>Reset View</span>
                 </button>
               </div>
+            </div>
 
+            {/* Display Options */}
+            <div className="bg-white rounded-[16px] border border-[#e5e7eb] p-[20px]">
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] leading-[24px] text-[#101828] mb-[16px]">
+                Display Options
+              </h3>
+              <div className="space-y-[12px]">
+                <button
+                  onClick={() => setShowGrid(!showGrid)}
+                  className={`w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors ${
+                    showGrid 
+                      ? 'bg-[#4a90e2] text-white' 
+                      : 'bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff]'
+                  }`}
+                >
+                  <Grid3x3 className="w-[20px] h-[20px]" />
+                  <span>Show Grid</span>
+                </button>
+                <button
+                  onClick={() => setShowLayers(!showLayers)}
+                  className={`w-full flex items-center gap-[12px] px-[16px] py-[12px] rounded-[8px] font-['Inter:Medium',sans-serif] font-medium text-[14px] transition-colors ${
+                    showLayers 
+                      ? 'bg-[#4a90e2] text-white' 
+                      : 'bg-[#f9fafb] text-[#4a5565] hover:bg-[#eff6ff]'
+                  }`}
+                >
+                  <Layers className="w-[20px] h-[20px]" />
+                  <span>Show Progress</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-[12px]">
               <button
-                type="button"
-                onClick={() => setIsAnimating((prev) => !prev)}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#4a90e2] px-4 py-3 text-[14px] font-semibold text-white"
+                onClick={() => navigate(`/models/${id}/customize`)}
+                className="w-full bg-[#4a90e2] hover:bg-[#3a7bc8] text-white px-[20px] py-[14px] rounded-[12px] font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] transition-colors"
               >
-                {isAnimating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isAnimating ? "Pause Animation" : "Play Animation"}
+                Customize Model
+              </button>
+              <button
+                onClick={() => navigate(`/models/${id}`)}
+                className="w-full bg-[#fe5c57] hover:bg-[#e54c47] text-white px-[20px] py-[14px] rounded-[12px] font-['Inter:Semi_Bold',sans-serif] font-semibold text-[16px] transition-colors"
+              >
+                Buy Now - $12.99
               </button>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="rounded-[28px] border border-[#e5e7eb] bg-white p-6 shadow-sm">
-              <h2 className="text-[22px] font-bold text-[#101828]">Display Options</h2>
-
-              <div className="mt-4 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setShowGrid((prev) => !prev)}
-                  className={`flex w-full items-center justify-between rounded-[12px] px-4 py-3 text-[14px] font-semibold ${
-                    showGrid
-                      ? "bg-[#4a90e2] text-white"
-                      : "bg-[#f9fafb] text-[#4a5565]"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Grid3x3 className="h-4 w-4" />
-                    Show Grid
-                  </span>
-                  <span>{showGrid ? "On" : "Off"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowLayers((prev) => !prev)}
-                  className={`flex w-full items-center justify-between rounded-[12px] px-4 py-3 text-[14px] font-semibold ${
-                    showLayers
-                      ? "bg-[#4a90e2] text-white"
-                      : "bg-[#f9fafb] text-[#4a5565]"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    Show Progress
-                  </span>
-                  <span>{showLayers ? "On" : "Off"}</span>
-                </button>
-              </div>
-
-              <div className="mt-5 flex flex-col gap-3">
-                <Link
-                  to={`/models/${model.id}/customize`}
-                  className="rounded-[12px] bg-[#4a90e2] px-4 py-3 text-center text-[14px] font-semibold text-white"
-                >
-                  Customize Model
-                </Link>
-                <Link
-                  to={`/models/${model.id}`}
-                  className="rounded-[12px] bg-[#fe5c57] px-4 py-3 text-center text-[14px] font-semibold text-white"
-                >
-                  Buy Now – ${model.price.toFixed(2)}
-                </Link>
-              </div>
-            </div>
-          </aside>
-        </section>
-      </main>
-
-      <footer className="border-t border-[#e2e8f0] bg-white">
-        <div className="mx-auto w-full max-w-[1200px] px-4 py-10 text-center text-[16px] tracking-[-0.02em] text-[#62748e] sm:px-6 lg:px-8">
-          © 2026 The Paper Model Hub. Built for builders.
+      {/* Footer */}
+      <footer className="bg-white border-t border-[#e2e8f0] mt-[80px]">
+        <div className="max-w-[1400px] mx-auto px-[40px] py-[40px]">
+          <p className="font-['Inter:Regular',sans-serif] text-[16px] leading-[24px] text-[#62748e] text-center">
+            © 2026 The Paper Model Hub. Built for builders.
+          </p>
         </div>
       </footer>
     </div>
