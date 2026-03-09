@@ -1,3 +1,72 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+  background: #ffffff;
+}
+
+.homepage-shell {
+  width: 100%;
+  background: #ffffff;
+}
+
+.homepage-main {
+  width: 100%;
+  background: #ffffff;
+}
+
+.homepage-artboard {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.homepage-artboard > [data-name="Homepage layout design"] {
+  width: 100%;
+  max-width: 1101px;
+  position: relative !important;
+  margin: 0 auto;
+}
+
+.homepage-artboard > [data-name="Homepage layout design"] > [data-name="Body"] {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 1101px;
+  margin: 0 auto;
+}
+
+.homepage-artboard [data-name="Main Content"] > div {
+  align-items: center !important;
+}
+
+@media (max-width: 1140px) {
+  .homepage-artboard {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .homepage-artboard > [data-name="Homepage layout design"] {
+    min-width: 1101px;
+  }
+
+  body {
+    overflow-x: auto;
+  }
+}
