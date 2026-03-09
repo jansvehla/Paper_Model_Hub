@@ -3,9 +3,14 @@ import { Navigation } from '../components/Navigation';
 
 export default function HomePage() {
   return (
-    <div>
+    <div className="homepage-shell bg-white">
       <Navigation />
-      <HomepageLayoutDesign />
+
+      <main className="homepage-main">
+        <div className="homepage-artboard">
+          <HomepageLayoutDesign />
+        </div>
+      </main>
     </div>
   );
 }
